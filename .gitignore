@@ -1,0 +1,11 @@
+test.*
+*.pyc
+*.log
+dataset
+*.swp
+.vscode/*
+input.txt
+output.txt
+*.json
+.vscode/*
+*.sh
