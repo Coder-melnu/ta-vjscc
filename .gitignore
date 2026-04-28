@@ -9,3 +9,7 @@ output.txt
 *.json
 .vscode/*
 *.sh
+datasets/
+out/*
+*.out
+*.csv
