@@ -48,8 +48,9 @@ Usage:
         annotation_path='datasets/UCF101TrainTestSplits-RecognitionTask/ucfTrainTestlist',
         mode='gop',
         gop_size=5,
+        gops_per_clip=1,
         image_size=256,
-        batch_size=8,
+        batch_size=32,
     )
 """
 
@@ -116,7 +117,7 @@ def parse_trainlist(annotation_path: str, frames_root: str,
 def parse_testlist(annotation_path: str, frames_root: str,
                    class_to_idx: dict, split: int = 1) -> list:
     """
-    Parse testlist0{split}.txt.f
+    Parse testlist0{split}.txt.
     Returns list of (frame_folder_path, label) tuples.
 
     testlist format: "ClassName/v_xxx.avi"  (no label column)
@@ -208,23 +209,24 @@ class UCF101FrameDataset(Dataset):
 class UCF101GoPDataset(Dataset):
     """
     Each item is a GoP: (N, C, H, W) tensor of N consecutive frames + label.
+    Samples gops_per_clip GoPs with random start positions per clip.
 
     Args:
-        samples    : list of (frame_dir, label)
-        transform  : torchvision transform applied to each frame
-        gop_size   : number of consecutive frames per GoP (N)
-        gop_stride : step between GoP start frames
+        samples       : list of (frame_dir, label)
+        transform     : torchvision transform applied to each frame
+        gop_size      : number of consecutive frames per GoP (N)
+        gops_per_clip : number of GoPs to randomly sample per clip
+        seed          : random seed for reproducibility
     """
 
     def __init__(self, samples: list, transform,
-                 gop_size: int = 5, gop_stride: int = 1):
-        self.transform  = transform
-        self.gop_size   = gop_size
-        self.gop_stride = gop_stride
+                 gop_size: int = 5, gops_per_clip: int = 1, seed: int = 42):
+        self.transform = transform
+        self.gop_size  = gop_size
+        self.rng       = random.Random(seed)
 
-        # Build index: list of (frame_paths_list, label)
         print(f"  Indexing {len(samples)} clips for GoPs "
-              f"(N={gop_size}, stride={gop_stride})...")
+              f"(N={gop_size}, gops_per_clip={gops_per_clip})...")
         self.index = []
         missing = 0
         for frame_dir, label in samples:
@@ -232,7 +234,9 @@ class UCF101GoPDataset(Dataset):
             if len(frames) < gop_size:
                 missing += 1
                 continue
-            for start in range(0, len(frames) - gop_size + 1, gop_stride):
+            max_start = len(frames) - gop_size
+            for _ in range(gops_per_clip):
+                start      = self.rng.randint(0, max_start)
                 gop_frames = frames[start:start + gop_size]
                 self.index.append((gop_frames, label))
 
@@ -273,7 +277,7 @@ def build_dataloaders(
     split: int = 1,
     frames_per_clip: int = 1,
     gop_size: int = 5,
-    gop_stride: int = 1,
+    gops_per_clip: int = 1,
     seed: int = 42,
 ) -> Tuple[DataLoader, DataLoader]:
     """
@@ -289,7 +293,7 @@ def build_dataloaders(
         split            : official split number (1, 2, or 3)
         frames_per_clip  : (frame mode) frames sampled per clip
         gop_size         : (gop mode) consecutive frames per GoP
-        gop_stride       : (gop mode) stride between GoP starts
+        gops_per_clip    : (gop mode) GoPs randomly sampled per clip
         seed             : random seed for reproducibility
 
     Returns:
@@ -297,19 +301,19 @@ def build_dataloaders(
     """
     # Transforms
     train_transform = transforms.Compose([
-    transforms.Resize((image_size, image_size)),
-    transforms.ToTensor(),  # [0, 1] normalization — matches Deep-JSCC-PyTorch
-     ])
+        transforms.Resize((image_size, image_size)),
+        transforms.ToTensor(),  # [0, 1] — matches Deep-JSCC-PyTorch
+    ])
 
     test_transform = transforms.Compose([
-    transforms.Resize((image_size, image_size)),
-    transforms.ToTensor(),
-   ])
+        transforms.Resize((image_size, image_size)),
+        transforms.ToTensor(),
+    ])
 
     # Parse annotations
-    class_to_idx   = load_class_index(annotation_path)
-    train_samples  = parse_trainlist(annotation_path, frames_root, split)
-    test_samples   = parse_testlist(annotation_path, frames_root, class_to_idx, split)
+    class_to_idx  = load_class_index(annotation_path)
+    train_samples = parse_trainlist(annotation_path, frames_root, split)
+    test_samples  = parse_testlist(annotation_path, frames_root, class_to_idx, split)
 
     # Build datasets
     if mode == 'frame':
@@ -319,9 +323,11 @@ def build_dataloaders(
                                       frames_per_clip=frames_per_clip, seed=seed)
     elif mode == 'gop':
         train_ds = UCF101GoPDataset(train_samples, train_transform,
-                                    gop_size=gop_size, gop_stride=gop_stride)
+                                    gop_size=gop_size, gops_per_clip=gops_per_clip,
+                                    seed=seed)
         test_ds  = UCF101GoPDataset(test_samples,  test_transform,
-                                    gop_size=gop_size, gop_stride=gop_stride)
+                                    gop_size=gop_size, gops_per_clip=gops_per_clip,
+                                    seed=seed)
     else:
         raise ValueError(f"mode must be 'frame' or 'gop', got '{mode}'")
 
@@ -350,6 +356,7 @@ if __name__ == '__main__':
                         default='datasets/UCF101TrainTestSplits-RecognitionTask/ucfTrainTestlist')
     parser.add_argument('--mode',            default='frame', choices=['frame', 'gop'])
     parser.add_argument('--gop_size',        type=int, default=5)
+    parser.add_argument('--gops_per_clip',   type=int, default=1)
     parser.add_argument('--image_size',      type=int, default=256)
     parser.add_argument('--batch_size',      type=int, default=4)
     parser.add_argument('--frames_per_clip', type=int, default=3)
@@ -365,6 +372,7 @@ if __name__ == '__main__':
         num_workers=0,
         frames_per_clip=args.frames_per_clip,
         gop_size=args.gop_size,
+        gops_per_clip=args.gops_per_clip,
     )
 
     print(f"\n--- Train loader ---")
