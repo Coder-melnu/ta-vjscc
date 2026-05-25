@@ -19,4 +19,5 @@ plots/*
 week3_results/*
 *.zip
 *.log
-*.txt
+*.txtdownstream/action_recognition/weights/*.pth
+downstream/action_recognition/weights/*.pt
