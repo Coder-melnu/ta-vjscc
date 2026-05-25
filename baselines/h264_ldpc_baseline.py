@@ -295,10 +295,17 @@ def simulate_ldpc_channel(input_file: str, output_file: str,
 
 def compute_ms_ssim_torch(orig_np: np.ndarray, recon_np: np.ndarray) -> float:
     """Compute MS-SSIM between two HWC uint8 images using pytorch-msssim."""
-    orig_t = torch.from_numpy(orig_np).permute(2, 0, 1).unsqueeze(0).float() / 255.0
+    orig_t  = torch.from_numpy(orig_np).permute(2, 0, 1).unsqueeze(0).float() / 255.0
     recon_t = torch.from_numpy(recon_np).permute(2, 0, 1).unsqueeze(0).float() / 255.0
-    return float(torch_ms_ssim(orig_t, recon_t, data_range=1.0))
 
+    H = orig_t.shape[2]
+    if H < 160:
+        # 3-scale fallback for small images (128x128)
+        weights = [0.3222, 0.3363, 0.3415]
+        return float(torch_ms_ssim(orig_t, recon_t, data_range=1.0,
+                                   win_size=7, weights=weights))
+    else:
+        return float(torch_ms_ssim(orig_t, recon_t, data_range=1.0))
 
 def compute_psnr_msssim(original_dir: str, reconstructed_dir: str) -> dict:
     """Compute average PSNR and MS-SSIM between two folders of frames."""
