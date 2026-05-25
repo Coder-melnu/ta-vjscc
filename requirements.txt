@@ -1,9 +1,47 @@
-torch
-torchvision
-matplotlib
-tqdm
-numpy
-pillow
-pyyaml
-scipy
-tensorboardX
+# TA-VJSCC Requirements
+# Install in ta-vjscc conda environment:
+#   pip install -r requirements.txt
+#
+# Note: sionna requires a separate conda environment (sionna env)
+#   because it depends on TensorFlow which conflicts with PyTorch CUDA.
+#   Run H.264+LDPC baselines in the sionna env separately.
+
+# Core deep learning
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Video model
+pytorchvideo
+fvcore
+
+# Image/video processing
+opencv-python>=4.8.0
+Pillow>=10.0.0
+scikit-image>=0.21.0
+
+# Metrics
+pytorch_msssim>=1.0.0
+
+# Data & logging
+numpy>=1.24.0
+pandas>=2.0.0
+matplotlib>=3.7.0
+tensorboard>=2.13.0
+tensorboardX>=2.6.0
+
+# Training utilities
+tqdm>=4.65.0
+pyyaml>=6.0
+
+# Action recognition — MMAction2 (C3D)
+# Install separately after pip install openmim:
+#   mim install mmengine mmcv mmaction2
+# openmim
+
+# Transformer utilities (SlowFast via torch.hub)
+# Installed automatically via pytorchvideo + fvcore
+
+# Note: The following are only needed in the sionna env for H.264+LDPC baseline:
+#   tensorflow>=2.12.0
+#   sionna>=0.14.0

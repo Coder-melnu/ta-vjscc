@@ -9,7 +9,14 @@ output.txt
 *.json
 .vscode/*
 *.sh
-datasets/
+datasets/*
 out/*
 *.out
 *.csv
+logs/*
+out_video/*
+plots/*
+week3_results/*
+*.zip
+*.log
+*.txt
