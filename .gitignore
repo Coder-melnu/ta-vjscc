@@ -25,5 +25,8 @@ downstream/action_recognition/weights/*.pt
 downstream/action_recognition/weights/*.pth
 downstream/action_recognition/weights/*.pt
 downstream/action_recognition/weights/
-out_video/
-out_ta_video/
+out_video/*
+out_ta_video/*
+out_ta_video_test/*
+plots_ta/*
+
