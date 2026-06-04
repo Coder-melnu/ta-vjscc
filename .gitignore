@@ -9,7 +9,7 @@ output.txt
 *.json
 .vscode/*
 *.sh
-datasets/*
+datasets/UCF101Frames 
 out/*
 *.out
 *.csv
@@ -19,7 +19,7 @@ plots/*
 week3_results/*
 *.zip
 *.log
-*.txt
+# *.txt
 downstream/action_recognition/weights/*.pth
 downstream/action_recognition/weights/*.pt
 downstream/action_recognition/weights/*.pth
