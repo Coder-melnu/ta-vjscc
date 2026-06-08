@@ -22,6 +22,14 @@ Fixes applied:
     Bug #6: Removed unused 'start' variable.
     Bug #7: weights_only=True added to torch.load() in FrozenTSN.
 
+PSNR diagnostic:
+    psnr_before_tsn is logged in train/val metrics at every epoch.
+    Use TensorBoard (val/psnr_before_tsn) to monitor reconstruction quality
+    before TSN sees frames. Key thresholds:
+        ~22–25 dB → resolution bottleneck (128×128) is limiting quality
+        ~28–35 dB → reconstruction is fine; issue is importance module / loss
+        Drop Stage1→Stage2 > 3 dB → joint loss is hurting reconstruction
+
 Usage:
     conda activate ta-vjscc
 
@@ -84,7 +92,8 @@ def train_epoch(model, optimizer, device, data_loader, max_iters=None):
         model.tsn.eval()
 
     totals  = {'loss': 0, 'l_task': 0, 'l_recon': 0,
-               'l_rate': 0, 'rate_mean': 0, 'score_mean': 0}
+               'l_rate': 0, 'rate_mean': 0, 'score_mean': 0,
+               'psnr_before_tsn': 0}   # <-- NEW
     n_iters = 0
 
     for gops, labels in data_loader:
@@ -117,7 +126,8 @@ def evaluate_epoch(model, device, data_loader):
     model.eval()
 
     totals  = {'loss': 0, 'l_task': 0, 'l_recon': 0,
-               'l_rate': 0, 'rate_mean': 0, 'score_mean': 0}
+               'l_rate': 0, 'rate_mean': 0, 'score_mean': 0,
+               'psnr_before_tsn': 0}   # <-- NEW
     correct = 0
     total   = 0
     n_iters = 0
@@ -369,6 +379,19 @@ def train_pipeline(params):
                 writer.add_scalar('learning_rate',
                                   optimizer.param_groups[0]['lr'], epoch)
 
+                # -------------------------------------------------------
+                # PSNR diagnostic print at Stage transition
+                # -------------------------------------------------------
+                if epoch == stage1_epochs - 1 and stage1_epochs > 0:
+                    print(f"\n  [Stage 1 final] val PSNR before TSN: "
+                          f"{val_metrics['psnr_before_tsn']:.2f} dB  "
+                          f"← reconstruction quality entering Stage 2")
+
+                if epoch == stage1_epochs and stage1_epochs > 0:
+                    print(f"\n  [Stage 2 start] val PSNR before TSN: "
+                          f"{val_metrics['psnr_before_tsn']:.2f} dB  "
+                          f"← check for drop vs Stage 1 final")
+
                 t.set_postfix(
                     stage   = f"S{model.stage}",
                     loss    = f"{train_metrics['loss']:.4f}",
@@ -376,6 +399,7 @@ def train_pipeline(params):
                     l_recon = f"{train_metrics['l_recon']:.4f}",
                     rate    = f"{train_metrics['rate_mean']:.3f}",
                     val_acc = f"{val_metrics['top1_acc']*100:.1f}%",
+                    psnr    = f"{val_metrics['psnr_before_tsn']:.1f}dB",  # <-- NEW
                     tau     = f"{tau:.2f}",
                 )
 
@@ -394,14 +418,16 @@ def train_pipeline(params):
                                os.path.join(root_ckpt_dir, 'best.pkl'))
                     print(f"\n  ✓ Best saved (Stage 2) — "
                           f"val_loss={best_val_loss:.4f} | "
-                          f"val_acc={val_metrics['top1_acc']*100:.1f}%")
+                          f"val_acc={val_metrics['top1_acc']*100:.1f}% | "
+                          f"val_psnr={val_metrics['psnr_before_tsn']:.2f} dB")  # <-- NEW
 
                 # Save Stage 1 final checkpoint for inspection
                 if epoch == stage1_epochs - 1 and stage1_epochs > 0:
                     torch.save(model.state_dict(),
                                os.path.join(root_ckpt_dir, 'stage1_final.pkl'))
                     print(f"\n  ✓ Stage 1 final checkpoint saved — "
-                          f"val_recon={val_metrics['l_recon']:.4f}")
+                          f"val_recon={val_metrics['l_recon']:.4f} | "
+                          f"val_psnr={val_metrics['psnr_before_tsn']:.2f} dB")  # <-- NEW
 
                 scheduler.step()
 
@@ -422,11 +448,12 @@ def train_pipeline(params):
 
     # Final evaluation
     final_val = evaluate_epoch(model, device, test_loader)
-    print(f"\nFinal val loss     : {final_val['loss']:.4f}")
-    print(f"Final val top1 acc : {final_val['top1_acc']*100:.1f}%")
-    print(f"Final rate_mean    : {final_val['rate_mean']:.3f}  "
+    print(f"\nFinal val loss          : {final_val['loss']:.4f}")
+    print(f"Final val top1 acc      : {final_val['top1_acc']*100:.1f}%")
+    print(f"Final val PSNR (→ TSN)  : {final_val['psnr_before_tsn']:.2f} dB")  # <-- NEW
+    print(f"Final rate_mean         : {final_val['rate_mean']:.3f}  "
           f"(fraction of features kept)")
-    print(f"Total time         : {(time.time()-t0)/3600:.2f}h")
+    print(f"Total time              : {(time.time()-t0)/3600:.2f}h")
 
     writer.add_text('result', str(final_val))
     writer.close()
@@ -434,14 +461,15 @@ def train_pipeline(params):
     with open(os.path.join(root_config_dir, 'config.yaml'), 'w') as f:
         yaml.dump({
             **{k: v for k, v in params.items() if k != 'device'},
-            'device'             : device_str,
-            'c'                  : c,
-            'stage1_epochs'      : stage1_epochs,
-            'stage2_epochs'      : stage2_epochs,
-            'max_iters_per_epoch': params.get('max_iters_per_epoch'),
-            'best_val_loss'      : best_val_loss,
-            'final_top1_acc'     : final_val['top1_acc'],
-            'trainable_params'   : trainable,
+            'device'               : device_str,
+            'c'                    : c,
+            'stage1_epochs'        : stage1_epochs,
+            'stage2_epochs'        : stage2_epochs,
+            'max_iters_per_epoch'  : params.get('max_iters_per_epoch'),
+            'best_val_loss'        : best_val_loss,
+            'final_top1_acc'       : final_val['top1_acc'],
+            'final_psnr_before_tsn': final_val['psnr_before_tsn'],  # <-- NEW
+            'trainable_params'     : trainable,
         }, f)
 
     del model, optimizer, scheduler, train_loader, test_loader, writer

@@ -11,6 +11,8 @@ Extends VideoJSCC with:
     5. Staged training support:
        Stage 1 (epochs 1–stage1_epochs): reconstruction loss only, selector bypassed
        Stage 2 (epochs stage1_epochs+1–end): full joint loss, selector active
+    6. PSNR logging: per-frame PSNR of x_refined vs x logged in info dict
+       before passing to TSN — diagnostic for reconstruction quality
 
 Pipeline:
     x (B,N,3,H,W)
@@ -20,11 +22,13 @@ Pipeline:
     → channel        → z_rx
     → decoder        → x_hat (B*N, 3, H, W)
     → temporal       → x_refined (B, N, 3, H, W)
+    → [PSNR logged here — before TSN sees frames]
     → FrozenTSN      → logits (B, 101)  [frozen weights, grad flows through frames]
 """
 
 import os
 import sys
+import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -35,6 +39,32 @@ sys.path.insert(0, PROJECT_ROOT)
 from model.jscc import DeepJSCC
 from model.temporal import TemporalFusionModule
 from model.importance import TaskAwareSelector
+
+
+# ---------------------------------------------------------------------------
+# PSNR helper
+# ---------------------------------------------------------------------------
+
+def compute_psnr(x_hat: torch.Tensor, x: torch.Tensor, max_val: float = 1.0) -> float:
+    """
+    Compute PSNR between reconstructed and original frames.
+
+    Args:
+        x_hat   : reconstructed tensor, any shape, float [0, max_val]
+        x       : original tensor, same shape as x_hat
+        max_val : peak signal value (default 1.0 for normalised frames)
+    Returns:
+        psnr_db : float — PSNR in dB (higher is better)
+
+    Note: computed with torch.no_grad() internally so it never contributes
+    gradients, even when called inside joint_loss() during training.
+    """
+    with torch.no_grad():
+        mse = F.mse_loss(x_hat.detach(), x.detach())
+        if mse.item() == 0.0:
+            return float('inf')
+        psnr_db = 20.0 * math.log10(max_val) - 10.0 * torch.log10(mse).item()
+    return psnr_db
 
 
 # ---------------------------------------------------------------------------
@@ -266,6 +296,16 @@ class TAVideoJSCC(nn.Module):
         FIX (Bug #1): returns x_refined and tsn_logits so the caller can
         compute accuracy from the SAME forward pass — no second forward call.
 
+        PSNR diagnostic: psnr_before_tsn is logged in info at every call.
+        This measures reconstruction quality of x_refined vs x BEFORE TSN
+        sees the frames. Use this to diagnose whether low accuracy is caused
+        by poor reconstruction or by the importance module / loss weights.
+
+        Expected ranges:
+            ~22–25 dB  → 128×128 resolution bottleneck is limiting quality
+            ~28–35 dB  → reconstruction is reasonable; issue is elsewhere
+            Drop Stage1→Stage2 > 3 dB → joint loss is hurting reconstruction
+
         Args:
             x      : (B, N, 3, H, W) — input GoP
             labels : (B,) int64 — UCF101 class indices
@@ -276,6 +316,12 @@ class TAVideoJSCC(nn.Module):
             tsn_logits : (B, 101) or None — TSN predictions (for accuracy)
         """
         x_refined, mask, logits = self.forward(x)
+
+        # ------------------------------------------------------------------
+        # PSNR diagnostic — computed before TSN forward pass
+        # Detached so it never affects gradients
+        # ------------------------------------------------------------------
+        psnr_before_tsn = compute_psnr(x_refined, x, max_val=1.0)
 
         # Reconstruction loss — always computed
         l_recon = F.mse_loss(x_refined, x)
@@ -304,14 +350,15 @@ class TAVideoJSCC(nn.Module):
         score_mean = torch.sigmoid(logits).mean().item()
 
         info = {
-            'loss'       : loss.item(),
-            'l_task'     : l_task.item(),
-            'l_recon'    : l_recon.item(),
-            'l_rate'     : l_rate.item(),
-            'rate_mean'  : mask.mean().item(),
-            'score_mean' : score_mean,
-            'tau'        : self.selector.tau,
-            'stage'      : float(self.stage),
+            'loss'            : loss.item(),
+            'l_task'          : l_task.item(),
+            'l_recon'         : l_recon.item(),
+            'l_rate'          : l_rate.item(),
+            'rate_mean'       : mask.mean().item(),
+            'score_mean'      : score_mean,
+            'psnr_before_tsn' : psnr_before_tsn,   # <-- NEW: dB, detached
+            'tau'             : self.selector.tau,
+            'stage'           : float(self.stage),
         }
 
         return loss, info, x_refined, tsn_logits
@@ -372,9 +419,10 @@ if __name__ == '__main__':
     x_ref, mask, raw_logits = model(x)
     print(f"mask mean (should be 1.0) : {mask.mean():.3f}")
     loss, info, x_ref2, tsn_logits = model.joint_loss(x, labels)
-    print(f"loss = l_recon only       : {info['loss']:.4f}")
-    print(f"l_task (should be 0.0)   : {info['l_task']:.4f}")
-    print(f"tsn_logits (should be None): {tsn_logits}")
+    print(f"loss = l_recon only           : {info['loss']:.4f}")
+    print(f"l_task (should be 0.0)        : {info['l_task']:.4f}")
+    print(f"psnr_before_tsn (Stage 1)     : {info['psnr_before_tsn']:.2f} dB")
+    print(f"tsn_logits (should be None)   : {tsn_logits}")
     loss.backward()
     print("Backward pass OK (Stage 1)")
 
@@ -387,7 +435,7 @@ if __name__ == '__main__':
     loss, info, x_ref2, tsn_logits = model.joint_loss(x, labels)
     print(f"Joint loss breakdown:")
     for k, v in info.items():
-        print(f"  {k:12s} : {v}")
+        print(f"  {k:20s} : {v}")
     loss.backward()
     print("Backward pass OK (Stage 2)")
     grad = model.selector.scorer.net[0].weight.grad
