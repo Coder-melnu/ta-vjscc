@@ -43,9 +43,9 @@ from data.ucf101_dataloader import build_dataloaders
 CKPT_ROOT      = 'out_video/checkpoints'
 FRAMES_ROOT    = 'datasets/UCF101Frames'
 ANNOTATION_PATH = 'datasets/UCF101TrainTestSplits-RecognitionTask/ucfTrainTestlist'
-OUTPUT_DIR     = 'week3_results'
+OUTPUT_DIR     = 'week3_results_paired_audit_snr13'#'week3_results'
 DEVICE         = 'cuda:0'
-SNR_LIST       = list(range(0, 26))   # 0 to 25 dB — matches H.264+LDPC baseline
+SNR_LIST       = [13]   # 0 to 25 dB — matches H.264+LDPC baseline
 REPEATS        = 1                    # 1 repeat sufficient with full 3783 GoPs
 IMAGE_SIZE     = 128
 GOP_SIZE       = 5
@@ -133,11 +133,13 @@ def evaluate_checkpoint(
             for gops, _ in test_loader:
                 gops = gops.to(device)          # (B, N, 3, H, W)
 
-                # Full model (with temporal fusion)
-                out_temp  = model(gops).clamp(0, 1)
-                # Ablation (no temporal fusion)
-                out_notmp = model.forward_no_temporal(gops).clamp(0, 1)
 
+		# Decode once so both paths use identical channel noise
+                out_notmp_raw = model.forward_no_temporal(gops)
+                out_temp_raw = model.temporal(out_notmp_raw)
+
+                out_temp = out_temp_raw.clamp(0, 1)
+                out_notmp = out_notmp_raw.clamp(0, 1)
                 # MSE
                 mse_temp  += torch.mean((out_temp  - gops) ** 2).item()
                 mse_notmp += torch.mean((out_notmp - gops) ** 2).item()
@@ -199,6 +201,8 @@ def main():
     ckpt_dirs = sorted(glob.glob(os.path.join(CKPT_ROOT, 'VideoJSCC_*')))
     ckpt_dirs = [d for d in ckpt_dirs
                  if os.path.exists(os.path.join(d, 'best.pkl'))]
+    ckpt_dirs = [d for d in ckpt_dirs
+                 if '_c8_snr13.0_ratio0.1667_' in os.path.basename(d)]
     print(f"Found {len(ckpt_dirs)} valid checkpoints\n")
 
     all_rows = []
