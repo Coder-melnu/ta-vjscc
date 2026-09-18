@@ -1,32 +1,78 @@
-test.*
+# Python caches
+__pycache__/
+*.py[cod]
 *.pyc
-*.log
-dataset
+
+# Editors and temporary files
+.vscode/
 *.swp
-.vscode/*
+*~
+.DS_Store
+
+# Local datasets
+dataset/
+datasets/
+UCF101Frames/
+
+# Generated experiment outputs
+/out/
+/out_*/
+/week3_results*/
+/plots/
+/plots_ta/
+/logs/
+
+# Generated training artifacts
+**/checkpoints/
+**/evaluation_checkpoints/
+**/tensorboard/
+**/events.out.tfevents.*
+*.pid
+
+# Model weights and large archives
+downstream/action_recognition/weights/*.pt
+downstream/action_recognition/weights/*.pth
+downstream/action_recognition/weights/*.pkl
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Generated runtime files
+test.*
 input.txt
 output.txt
-*.json
-.vscode/*
-*.sh
-datasets/UCF101Frames 
-out/*
-*.out
-*.csv
-logs/*
-out_video/*
-plots/*
-week3_results/*
-*.zip
 *.log
-# *.txt
-downstream/action_recognition/weights/*.pth
-downstream/action_recognition/weights/*.pt
-downstream/action_recognition/weights/*.pth
-downstream/action_recognition/weights/*.pt
-downstream/action_recognition/weights/
-out_video/*
-out_ta_video/*
-out_ta_video_test/*
-plots_ta/*
+*.out
 
+# Result collections retained separately in the handover package
+/results/
+/results (2)/
+downstream/action_recognition/results/
+downstream/action_recognition/weights/
+
+# Temporary installation and transfer copies
+/*_install/
+/*_install_v*/
+/*_install_v2/
+/*_install_v3/
+
+# Superseded source snapshots and temporary files
+*_before_*
+*.before_*
+/continuous_evaluator_source.py
+/continuous_evaluator_source.txt
+/continuous_uep_source.txt
+/staged_training_source.py
+/temp.py
+
+# Ad-hoc logs and preview assets
+/training_log_*.txt
+/tsm_loading_test.txt
+/tsn_full_log.txt
+/*.jpg
+
+# Derived analysis outputs at repository root
+/finetuned_native_vs_topk_mcnemar.csv
+/psnr_accuracy_candidate_pairs_*.csv
+/topk_vs_controls_mcnemar_validation.json
