@@ -1,0 +1,257 @@
+{
+  "status": "PASS",
+  "official_test_accessed": false,
+  "baseline_count": 20,
+  "topk_training_seeds": [
+    42,
+    43,
+    44
+  ],
+  "topk_modes": [
+    "learned_topk",
+    "random_topk",
+    "uniform_topk"
+  ],
+  "split_seed": 42,
+  "test_gop_seed": 44,
+  "channel_seed": 1042,
+  "records": [
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 4,
+      "snr_db": 13,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c4_snr13_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "c18be12882f40b9c262c6c3324cca00dabf550a42cb1c18ddc92973177b09f50"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 4,
+      "snr_db": 19,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c4_snr19_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "f8cbd5aa26c81c74b3e67df32c6dfba814088f49139be049d3f0ab4e30093f74"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 4,
+      "snr_db": 1,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c4_snr1_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "98f8167a718abcfe73b3b6d2a9bedbb8ceee5674d1cd8b7a7c54f6a4d62ab544"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 4,
+      "snr_db": 4,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c4_snr4_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "c9bb75f67b70332b9bf4af50ca2c308af0c09fb38fa3c291375ad50ea94bc4d5"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 4,
+      "snr_db": 7,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c4_snr7_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "044578ee19a24a93a24cc37d124c6ac3122dd8eadc31218b9f6542651f4266a0"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 8,
+      "snr_db": 13,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c8_snr13_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "72c8b7d2269db43c537d8d9dc003042245a9314aa02ee142543ece5d36d0e295"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 8,
+      "snr_db": 19,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c8_snr19_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "8f916cc46b70c82a4225a943d2d0ed305afa910d437b8ecfea65739fd65281db"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 8,
+      "snr_db": 1,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c8_snr1_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "b0bc50f2947a9daa7313854057dcde373f9f8702d1fe4ea5ed90cb55465108c0"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 8,
+      "snr_db": 4,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c8_snr4_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "8ee9106e865e9dd3add1e0e2f69b1dbd0464569af5af404eb2a2fe8b7fb24539"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "AWGN",
+      "c": 8,
+      "snr_db": 7,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean/VideoJSCC_AWGN_c8_snr7_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "94ce970e09881b67096395a516e9d44bc9fc87b4811010dfd13a8a06ee4c36c3"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 8,
+      "snr_db": 13,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh/VideoJSCC_Rayleigh_c8_snr13_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "7b9cd114ced4fff5822eafcf03fb5f25ae4a02c6abd46103f6772554977a7cfd"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 8,
+      "snr_db": 19,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh/VideoJSCC_Rayleigh_c8_snr19_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "1ba65be5cbdfdad59adda75027d00e2dfbe99f30ed1d8568e0b9908fd4847e69"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 8,
+      "snr_db": 1,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh/VideoJSCC_Rayleigh_c8_snr1_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "8575588644c051e7b013430443612964dad3cf9aa30d86a439772fe2e873d7cc"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 8,
+      "snr_db": 4,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh/VideoJSCC_Rayleigh_c8_snr4_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "8f33e07e51524074c68a88912c5751283011b81284e59546b9cfe178d5e9c092"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 8,
+      "snr_db": 7,
+      "nominal_cbr": "1/6",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh/VideoJSCC_Rayleigh_c8_snr7_ratio0.1667_seed42/checkpoints/best.pt",
+      "sha256": "94012854a9814c30861ab28842f47a93b38c5db7bf5e49aa13f247f5ac5c03ea"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 4,
+      "snr_db": 13,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh_c4/VideoJSCC_Rayleigh_c4_snr13_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "8d5de68d5a3c5cd5ba7e88c1d555843bd3e3e880b0fc8ccee77d1be22fd28cb8"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 4,
+      "snr_db": 19,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh_c4/VideoJSCC_Rayleigh_c4_snr19_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "3afdef4b0a209f3f41507baa5a815000cdc5f56450e75a198d5deaa687af0627"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 4,
+      "snr_db": 1,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh_c4/VideoJSCC_Rayleigh_c4_snr1_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "bf04485b0de3143bd168da15fa4585be80db60c5c00578bf36457e027256ee4d"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 4,
+      "snr_db": 4,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh_c4/VideoJSCC_Rayleigh_c4_snr4_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "450f16a84ee5b39c82a4285f68370b4ee0c080b79bbbcaeb9db7ac3ddc2fdf8e"
+    },
+    {
+      "family": "corrected_baseline",
+      "channel": "Rayleigh",
+      "c": 4,
+      "snr_db": 7,
+      "nominal_cbr": "1/12",
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_video_clean_rayleigh_c4/VideoJSCC_Rayleigh_c4_snr7_ratio0.0833_seed42/checkpoints/best.pt",
+      "sha256": "7ab5460a64d36a543e3da893ca611c65ddb09404a43afa7a943d04b5ef835ab9"
+    },
+    {
+      "family": "exact_topk",
+      "training_seed": 42,
+      "modes": [
+        "learned_topk",
+        "random_topk",
+        "uniform_topk"
+      ],
+      "c": 8,
+      "keep_fraction": 0.5,
+      "actual_cbr": "1/12",
+      "channel": "AWGN",
+      "snr_db": 13,
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_topk50_selector_trained_c8_snr13/checkpoints/TAVideoJSCC_AWGN_c8_snr13.0_ratio0.1667_topk0.50_joint25ep_lt0.001_lr1.0_lrate0.0_00h37m04s_on_Sep_04_2026/best.pt",
+      "sha256": "0256e4fe0947522cd9848d03a144def58b2f6eb900a817e21304c086c4f2943a"
+    },
+    {
+      "family": "exact_topk",
+      "training_seed": 43,
+      "modes": [
+        "learned_topk",
+        "random_topk",
+        "uniform_topk"
+      ],
+      "c": 8,
+      "keep_fraction": 0.5,
+      "actual_cbr": "1/12",
+      "channel": "AWGN",
+      "snr_db": 13,
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_topk50_selector_trained_c8_snr13_seed43/checkpoints/TAVideoJSCC_AWGN_c8_snr13.0_ratio0.1667_topk0.50_joint25ep_lt0.001_lr1.0_lrate0.0_16h10m50s_on_Sep_05_2026/best.pt",
+      "sha256": "78fa4b7e3e56c89b45d3a2180c47d5f2831656a534a04e84be55c91abf597ef7"
+    },
+    {
+      "family": "exact_topk",
+      "training_seed": 44,
+      "modes": [
+        "learned_topk",
+        "random_topk",
+        "uniform_topk"
+      ],
+      "c": 8,
+      "keep_fraction": 0.5,
+      "actual_cbr": "1/12",
+      "channel": "AWGN",
+      "snr_db": 13,
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_topk50_selector_trained_c8_snr13_seed44/checkpoints/TAVideoJSCC_AWGN_c8_snr13.0_ratio0.1667_topk0.50_joint25ep_lt0.001_lr1.0_lrate0.0_17h21m11s_on_Sep_05_2026/best.pt",
+      "sha256": "61e3b17835b408b97f5908c0629687175cf592a39e652ca7d0b8ecfe29e34410"
+    },
+    {
+      "family": "fine_tune_only_no_selector",
+      "c": 8,
+      "nominal_cbr": "1/6",
+      "channel": "AWGN",
+      "snr_db": 13,
+      "path": "/home/g3060itx/Nu/ta-vjscc/out_videojscc_no_selector_c8_snr13/checkpoints/VideoJSCCNoSelector_AWGN_c8_snr13.0_ratio0.1667_joint25ep_lt0.001_lr1.0_19h54m19s_on_Sep_01_2026/best_top1.pt",
+      "sha256": "99b3fd81efe5f40cbbbcabf8d9e86dc7a31235ab006bb6347dea776d380b8408"
+    }
+  ]
+}
