@@ -10,7 +10,7 @@ Research code and frozen experimental records for the TA-VJSCC video DeepJSCC at
 **Verified environment snapshot:** commit `4523b09023d2a3cc6645c68587be3e2fc1c90ffe`
 **Canonical environment:** Conda `ta-vjscc`, Python 3.10.20, PyTorch 2.5.1+cu121, CUDA 12.1, RTX 3060 12 GB.
 
-The Overleaf manuscript is shared separately with Dr. Amir and Than Than Nu as editors. Manuscript sources are not stored here. Canonical rows are therefore identified by stable `result_id` values rather than mutable Overleaf table numbers.
+The Overleaf manuscript is shared separately with Dr. Amir as viewer and Than Than Nu and Arjarn Supavadee as editors. Manuscript sources are not stored here. Canonical rows are therefore identified by stable `result_id` values rather than mutable Overleaf table numbers.
 
 ### Authoritative records
 
