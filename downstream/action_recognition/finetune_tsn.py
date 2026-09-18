@@ -13,8 +13,9 @@ Usage:
 
 Expected:
     - Runtime : ~3-5 min/epoch → ~30-50 min total
-    - Val acc : ~60-70% (frame-level averaging, no temporal modeling)
-    - Saved to: downstream/action_recognition/weights/tsn_ucf101_head.pth
+    - Best head selected on group-aware internal validation
+    - Official test evaluated once after selection
+    - Top-1/Top-5 history saved beside the head as JSON
 """
 
 import os
@@ -32,13 +33,17 @@ def get_args():
     parser.add_argument('--annotation_path',
         default='datasets/UCF101TrainTestSplits-RecognitionTask/ucfTrainTestlist')
     parser.add_argument('--save_path',
-        default='downstream/action_recognition/weights/tsn_ucf101_head.pth')
-    parser.add_argument('--epochs',      type=int,   default=10)
+        default='downstream/action_recognition/weights/tsn_ucf101_layer4_best.pth')
+    parser.add_argument('--epochs',      type=int,   default=25)
     parser.add_argument('--batch_size',  type=int,   default=16)
     parser.add_argument('--lr',          type=float, default=1e-3)
+    parser.add_argument('--layer4_lr',   type=float, default=1e-4)
+    parser.add_argument('--finetune', choices=['head', 'layer4'], default='layer4')
     parser.add_argument('--device',      default='cuda:0')
     parser.add_argument('--num_workers', type=int,   default=4)
     parser.add_argument('--image_size',  type=int,   default=128)
+    parser.add_argument('--val_fraction',type=float, default=0.1)
+    parser.add_argument('--seed',        type=int,   default=42)
     return parser.parse_args()
 
 
@@ -55,10 +60,14 @@ if __name__ == '__main__':
     print(f"  Epochs     : {args.epochs}")
     print(f"  Batch size : {args.batch_size}")
     print(f"  LR         : {args.lr}")
+    print(f"  Layer4 LR  : {args.layer4_lr}")
     print(f"  Image size : {args.image_size}")
     print(f"  Save path  : {args.save_path}")
-    print(f"  Backbone   : ResNet-50 FROZEN")
-    print(f"  Head       : Linear(2048, 101) trainable")
+    print(f"  Val split  : {args.val_fraction:.0%} group-aware")
+    print(f"  Seed       : {args.seed}")
+    print(f"  Fine-tune  : {args.finetune}")
+    print(f"  Backbone   : stem/layer1/layer2/layer3 frozen")
+    print(f"  Trainable  : {'layer4 + head' if args.finetune == 'layer4' else 'head only'}")
     print("=" * 60)
 
     from downstream.action_recognition.models.tsn_recognizer import finetune_tsn_head
@@ -70,7 +79,11 @@ if __name__ == '__main__':
         epochs=args.epochs,
         batch_size=args.batch_size,
         lr=args.lr,
+        layer4_lr=args.layer4_lr,
+        finetune=args.finetune,
         device=args.device,
         num_workers=args.num_workers,
         image_size=args.image_size,
+        val_fraction=args.val_fraction,
+        seed=args.seed,
     )
